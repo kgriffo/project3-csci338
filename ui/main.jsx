@@ -3,3 +3,11 @@ async function main() {
   }
   
   window.onload=main
+
+function FilmEntry({ id, title, description }) {
+  return (
+    <p>
+      <a href={`/film/${id}`}>{title}</a>: {description}
+    </p>
+  );
+}
