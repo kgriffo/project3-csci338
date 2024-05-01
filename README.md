@@ -1,5 +1,5 @@
 # Project3
 
-## To-do list app
+## dvdrental app
 
-The intention of this project is to make a simple to-do list web app.
+The intention of this project is to display a list of movies located on a dvdrental database.
