@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.future import select
 
@@ -46,6 +47,48 @@ async def films():
                 }
             )
     return results
+
+@app.get("/film/{id}", response_class=HTMLResponse)
+async def film(id: int):
+    with open("ui/dist/film.html") as file:
+        return file.read()
+    
+@app.get("/", response_class=HTMLResponse)
+async def root():
+    with open("ui/dist/film.html") as file:
+        return file.read()
+
+
+# ChatGPT helped out with this
+@app.get("/api/v1/film/{id}")
+async def get_film(id: int):
+    async with AsyncSession(engine) as session:
+        Film = await auto_models.get("film")
+        result = await session.execute(select(Film).where(Film.film_id == id))
+        film = result.scalars().first()
+
+        if film:
+            return {
+                "title": film.title,
+                "description": film.description,
+                "id": film.film_id,
+            }
+        else:
+            return {"error": "Film not found"}
+        
+@app.delete("/api/v1/film/{id}")
+async def api_v1_film_delete(id: int):
+    Film = await auto_models.get("film")
+
+    async with AsyncSession(engine) as session:
+        film = await session.execute(select(Film).where(Film.film_id == id))
+        film = film.scalars().first()
+        if film:
+            await session.delete(film)
+            await session.commit()
+            return {"ok": True}
+        else:
+            return {"ok": False, "reason": "not found"}
 
 
 app.mount("/", StaticFiles(directory="ui/dist", html=True), name="ui")
